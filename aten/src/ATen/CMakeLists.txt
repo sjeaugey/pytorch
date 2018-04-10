@@ -332,9 +332,9 @@ IF(CUDA_FOUND)
       ${CUDA_TOOLKIT_ROOT_DIR}/lib64/libcusparse_static.a
       ${CUDA_TOOLKIT_ROOT_DIR}/lib64/libcurand_static.a
       ${CUDA_TOOLKIT_ROOT_DIR}/lib64/libcublas_static.a
-      ${CUFFT_STATIC_LIB}
+      ${CUDA_TOOLKIT_ROOT_DIR}/lib64/libcufft_static.a
       )
-    CUDA_ADD_CUFFT_TO_TARGET(ATen)
+    # CUDA_ADD_CUFFT_TO_TARGET(ATen)
   ELSE()
     TARGET_LINK_LIBRARIES(ATen
       ${CUDA_LIBRARIES}
