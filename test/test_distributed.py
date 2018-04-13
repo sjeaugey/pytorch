@@ -23,8 +23,8 @@ INIT_METHOD = os.getenv('INIT_METHOD', 'env://')
 MASTER_PORT = '29500'
 MASTER_ADDR = '127.0.0.1'
 
-DEFAULT_TIMEOUT = 15
-CUSTOMIZED_TIMEOUT = {'test_DistributedDataParallel': 25}
+DEFAULT_TIMEOUT = 30
+CUSTOMIZED_TIMEOUT = {'test_DistributedDataParallel': 50}
 
 
 def get_timeout(test_id):
@@ -909,8 +909,18 @@ if BACKEND == 'tcp' or BACKEND == 'gloo' or BACKEND == 'nccl':
                 or getattr(fn, "skip_if_no_multigpu", False) \
                 or getattr(fn, "skip_if_small_worldsize", False)
             self.JOIN_TIMEOUT = get_timeout(self.id())
-            for p in self.processes:
-                p.join(self.JOIN_TIMEOUT)
+            start = time.time()
+            while (time.time() < start + self.JOIN_TIMEOUT) :
+                if any(p.is_alive() for p in self.processes) :
+                    time.sleep(0.1)
+                else :
+                    break
+            else:
+                for p in self.processes :
+                    p.terminate()
+
+            for p in self.processes :
+                p.join()
                 if not skip_ok:
                     self.assertEqual(p.exitcode, 0)
 
