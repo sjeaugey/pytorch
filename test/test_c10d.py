@@ -245,8 +245,17 @@ class MultiProcessTestCase(TestCase):
 
     def _join_processes(self, fn):
         timeout = get_timeout(self.id())
-        for p in self.processes:
-            p.join(timeout)
+        start = time.time()
+        while (time.time() < start + timeout) :
+            if any(p.is_alive() for p in self.processes) :
+                time.sleep(0.1)
+            else :
+                break
+        else:
+            for p in self.processes :
+                p.terminate()
+        for p in self.processes :
+            p.join()
         self._check_return_codes()
 
     def _check_return_codes(self):

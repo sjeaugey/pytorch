@@ -1100,8 +1100,18 @@ if BACKEND == "tcp" or BACKEND == "gloo" or BACKEND == "nccl":
                 getattr(fn, "skip_if_small_worldsize", False)
             )
             self.JOIN_TIMEOUT = get_timeout(self.id())
-            for p in self.processes:
-                p.join(self.JOIN_TIMEOUT)
+            start = time.time()
+            while (time.time() < start + self.JOIN_TIMEOUT) :
+                if any(p.is_alive() for p in self.processes) :
+                    time.sleep(0.1)
+                else :
+                    break
+            else:
+                for p in self.processes :
+                    p.terminate()
+
+            for p in self.processes :
+                p.join()
 
             first_process = self.processes[0]
             for p in self.processes:
